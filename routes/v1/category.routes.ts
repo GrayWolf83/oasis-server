@@ -4,6 +4,7 @@ import Category from '../../models/Category'
 import imageMiddleware from '../../middleware/image'
 import imageToWebp from '../../middleware/imageWebp'
 import deleteImage from '../../utils/deleteImage'
+import ManageAuth from '../../middleware/manage.middleware'
 
 const router = express.Router()
 
@@ -19,6 +20,7 @@ router.get('/', async (req, res) => {
 
 router.post(
 	'/',
+	ManageAuth,
 	imageMiddleware.single('image'),
 	imageToWebp,
 	async (req, res) => {
