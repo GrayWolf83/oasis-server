@@ -52,4 +52,29 @@ router.post(
 	},
 )
 
+router.delete('/:id', ManageAuth, async (req, res) => {
+	const id = req.params.id
+	try {
+		const category: ICategory = await Category.findOne({
+			where: { id },
+		})
+
+		deleteImage(category.image)
+		deleteImage(category.imageWebp)
+
+		// await Product.update(
+		// 	{ category: "0", isVisible: false },
+		// 	{ where: { category: id } },
+		// )
+
+		await Category.destroy({
+			where: { id },
+		})
+
+		res.status(200).send(id)
+	} catch (error) {
+		console.log(error)
+	}
+})
+
 export default router
