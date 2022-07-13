@@ -1,6 +1,7 @@
 import express from 'express'
 import ICategory from '../../types/category'
 import Category from '../../models/Category'
+import Product from '../../models/Product'
 import imageMiddleware from '../../middleware/image'
 import imageToWebp from '../../middleware/imageWebp'
 import deleteImage from '../../utils/deleteImage'
@@ -62,10 +63,14 @@ router.delete('/:id', ManageAuth, async (req, res) => {
 		deleteImage(category.image)
 		deleteImage(category.imageWebp)
 
-		// await Product.update(
-		// 	{ category: "0", isVisible: false },
-		// 	{ where: { category: id } },
-		// )
+		const noneCategory: ICategory = await Category.findOne({
+			where: { name: 'Без категории' },
+		})
+
+		await Product.update(
+			{ category: noneCategory.id, isVisible: false },
+			{ where: { category: id } },
+		)
 
 		await Category.destroy({
 			where: { id },
