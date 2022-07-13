@@ -4,6 +4,7 @@ import path from 'path'
 import cors from 'cors'
 import helmet from 'helmet'
 import sequelize from './utils/database'
+import Preloaded from './services/preloaded.service'
 require('dotenv').config()
 const routesV1 = require('./routes/v1')
 
@@ -22,6 +23,7 @@ const port = process.env.PORT
 async function start() {
 	try {
 		await sequelize.sync()
+		await Preloaded()
 		app.listen(port, () => {
 			console.log(`Сервер запущен, порт ${port}`)
 		})
