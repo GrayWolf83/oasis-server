@@ -36,7 +36,7 @@ const Product = sequelize.define(
 		isVisible: {
 			type: DataTypes.BOOLEAN,
 			allowNull: false,
-			defaultValue: true,
+			defaultValue: false,
 		},
 		price: {
 			type: DataTypes.INTEGER,
