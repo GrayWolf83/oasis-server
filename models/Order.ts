@@ -36,11 +36,11 @@ const Order = sequelize.define(
 			allowNull: false,
 		},
 		status: {
-			type: DataTypes.ENUM('start', 'cooking', 'delivery', 'end'),
+			type: DataTypes.ENUM('start', 'delivery', 'end'),
 			allowNull: false,
 			defaultValue: 'start',
 			validate: {
-				isIn: [['start', 'cooking', 'delivery', 'end']],
+				isIn: [['start', 'delivery', 'end']],
 			},
 		},
 	},

@@ -8,41 +8,14 @@ const { Op } = require('sequelize')
 
 const router = express.Router()
 
-router.get('/', Auth, async (req, res) => {
+router.get('/clientActiveOrders', Auth, async (req, res) => {
 	const { user } = req.body
 	try {
 		const orders = await Order.findAll({
-			where: { user: user.id },
-			include: [
-				{
-					model: OrderProduct,
-					attributes: ['id', 'count'],
-					include: {
-						model: Product,
-						attributes: [
-							'name',
-							'description',
-							'price',
-							'image',
-							'imageWebp',
-						],
-					},
-				},
-			],
-		})
-
-		res.status(200).send(orders)
-	} catch (error) {
-		console.log(error)
-	}
-})
-
-router.get('/activeOrders', ManageAuth, async (req, res) => {
-	try {
-		const orders = await Order.findAll({
 			where: {
+				user: user.id,
 				status: {
-					[Op.or]: ['start', 'cooking', 'delivery'],
+					[Op.or]: ['start', 'delivery'],
 				},
 			},
 			include: [
@@ -69,7 +42,71 @@ router.get('/activeOrders', ManageAuth, async (req, res) => {
 	}
 })
 
-router.get('/archiveOrders', ManageAuth, async (req, res) => {
+router.get('/clientArchiveOrders', Auth, async (req, res) => {
+	const { user } = req.body
+	try {
+		const orders = await Order.findAll({
+			where: {
+				user: user.id,
+				status: 'end',
+			},
+			include: [
+				{
+					model: OrderProduct,
+					attributes: ['id', 'count'],
+					include: {
+						model: Product,
+						attributes: [
+							'name',
+							'description',
+							'price',
+							'image',
+							'imageWebp',
+						],
+					},
+				},
+			],
+		})
+
+		res.status(200).send(orders)
+	} catch (error) {
+		console.log(error)
+	}
+})
+
+router.get('/manageActiveOrders', ManageAuth, async (req, res) => {
+	try {
+		const orders = await Order.findAll({
+			where: {
+				status: {
+					[Op.or]: ['start', 'delivery'],
+				},
+			},
+			include: [
+				{
+					model: OrderProduct,
+					attributes: ['id', 'count'],
+					include: {
+						model: Product,
+						attributes: [
+							'name',
+							'description',
+							'price',
+							'image',
+							'imageWebp',
+						],
+					},
+				},
+			],
+		})
+
+		res.status(200).send(orders)
+	} catch (error) {
+		console.log(error)
+	}
+})
+
+router.get('/manageArchiveOrders', ManageAuth, async (req, res) => {
 	try {
 		const orders = await Order.findAll({
 			where: {
@@ -99,11 +136,11 @@ router.get('/archiveOrders', ManageAuth, async (req, res) => {
 	}
 })
 
-router.post('/', Auth, async (req, res) => {
+router.post('/', async (req, res) => {
 	try {
 		const { user, price, name, phone, address, orderProducts } = req.body
 		const order = await Order.create({
-			user: user.id || null,
+			user,
 			price,
 			name,
 			phone,
@@ -118,6 +155,49 @@ router.post('/', Auth, async (req, res) => {
 		await OrderProduct.bulkCreate(ordProds)
 
 		res.status(200).send()
+	} catch (error) {
+		console.log(error)
+	}
+})
+
+router.patch('/', ManageAuth, async (req, res) => {
+	const { id } = req.body
+
+	try {
+		const oldOrder = await Order.findOne({ where: { id } })
+		const status = oldOrder.status === 'start' ? 'delivery' : 'end'
+		await Order.update(
+			{ status },
+			{
+				where: {
+					id,
+				},
+			},
+		)
+
+		const order = await Order.findOne({
+			where: {
+				id,
+			},
+			include: [
+				{
+					model: OrderProduct,
+					attributes: ['id', 'count'],
+					include: {
+						model: Product,
+						attributes: [
+							'name',
+							'description',
+							'price',
+							'image',
+							'imageWebp',
+						],
+					},
+				},
+			],
+		})
+
+		res.status(200).send(order)
 	} catch (error) {
 		console.log(error)
 	}

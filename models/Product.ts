@@ -42,11 +42,6 @@ const Product = sequelize.define(
 			type: DataTypes.INTEGER,
 			allowNull: false,
 		},
-		rating: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			defaultValue: 5,
-		},
 		comments: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
