@@ -8,7 +8,11 @@ async function imageToWebp(req, res, next) {
 				req.file.path.split('.')[0] + '.webp',
 				'-q 80',
 			)
-			const imageName = req.file.path.split('\\')
+
+			const imageName =
+				process.platform === 'win32'
+					? req.file.path.split('\\')
+					: req.file.path.split('/')
 
 			req.body.image = imageName[imageName.length - 1]
 			req.body.imageWebp = req.body.image.split('.')[0] + '.webp'

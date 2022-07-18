@@ -1,9 +1,11 @@
 import express from 'express'
 import ICategory from '../../types/category'
 import Category from '../../models/Category'
+import Product from '../../models/Product'
 import imageMiddleware from '../../middleware/image'
 import imageToWebp from '../../middleware/imageWebp'
 import deleteImage from '../../utils/deleteImage'
+import ManageAuth from '../../middleware/manage.middleware'
 
 const router = express.Router()
 
@@ -19,6 +21,7 @@ router.get('/', async (req, res) => {
 
 router.post(
 	'/',
+	ManageAuth,
 	imageMiddleware.single('image'),
 	imageToWebp,
 	async (req, res) => {
@@ -49,5 +52,34 @@ router.post(
 		}
 	},
 )
+
+router.delete('/:id', ManageAuth, async (req, res) => {
+	const id = req.params.id
+	try {
+		const category: ICategory = await Category.findOne({
+			where: { id },
+		})
+
+		deleteImage(category.image)
+		deleteImage(category.imageWebp)
+
+		const noneCategory: ICategory = await Category.findOne({
+			where: { name: 'Без категории' },
+		})
+
+		await Product.update(
+			{ category: noneCategory.id, isVisible: false },
+			{ where: { category: id } },
+		)
+
+		await Category.destroy({
+			where: { id },
+		})
+
+		res.status(200).send(id)
+	} catch (error) {
+		console.log(error)
+	}
+})
 
 export default router
